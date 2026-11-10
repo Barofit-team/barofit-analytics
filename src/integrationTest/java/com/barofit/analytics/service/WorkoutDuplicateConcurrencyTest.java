@@ -32,13 +32,10 @@ import org.springframework.test.context.TestPropertySource;
     webEnvironment = SpringBootTest.WebEnvironment.NONE)
 @TestPropertySource(
     properties = {
-      "spring.datasource.url=jdbc:postgresql://localhost:5432/barofit_analytics_test",
-      "spring.datasource.username=postgres",
-      "spring.datasource.password=postgres",
       "spring.datasource.hikari.maximum-pool-size=12",
       "spring.jpa.hibernate.ddl-auto=validate"
     })
-class WorkoutDuplicateConcurrencyTest {
+class WorkoutDuplicateConcurrencyTest extends AnalyticsPostgresSupport {
 
   @SpringBootConfiguration
   @EnableAutoConfiguration
