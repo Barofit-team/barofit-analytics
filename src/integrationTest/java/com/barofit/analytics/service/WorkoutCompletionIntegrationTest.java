@@ -26,15 +26,9 @@ import org.springframework.transaction.annotation.Transactional;
 @SpringBootTest(
     classes = WorkoutCompletionIntegrationTest.TestApplication.class,
     webEnvironment = SpringBootTest.WebEnvironment.NONE)
-@TestPropertySource(
-    properties = {
-      "spring.datasource.url=jdbc:postgresql://localhost:5432/barofit_analytics_test",
-      "spring.datasource.username=postgres",
-      "spring.datasource.password=postgres",
-      "spring.jpa.hibernate.ddl-auto=validate"
-    })
+@TestPropertySource(properties = "spring.jpa.hibernate.ddl-auto=validate")
 @Transactional
-class WorkoutCompletionIntegrationTest {
+class WorkoutCompletionIntegrationTest extends AnalyticsPostgresSupport {
 
   @SpringBootConfiguration
   @EnableAutoConfiguration
