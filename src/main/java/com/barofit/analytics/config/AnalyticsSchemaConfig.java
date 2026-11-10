@@ -6,5 +6,8 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration(proxyBeanMethods = false)
 class AnalyticsSchemaConfig {
-    @Bean ModuleSchema analyticsSchema() { return new ModuleSchema("analytics"); }
+  @Bean
+  ModuleSchema analyticsSchema() {
+    return new ModuleSchema("analytics");
+  }
 }
