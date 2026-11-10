@@ -19,35 +19,53 @@ import org.springframework.web.server.ResponseStatusException;
 @RestController
 @RequestMapping("/internal/workout-completions")
 public class WorkoutCompletionIngestController {
-    private final WorkoutCompletionService completions;
-    private final String internalToken;
+  private final WorkoutCompletionService completions;
+  private final String internalToken;
 
-    public WorkoutCompletionIngestController(WorkoutCompletionService completions,
-            @Value("${barofit.analytics.internal-token:}") String internalToken) {
-        this.completions = completions;
-        this.internalToken = internalToken;
+  public WorkoutCompletionIngestController(
+      WorkoutCompletionService completions,
+      @Value("${barofit.analytics.internal-token:}") String internalToken) {
+    this.completions = completions;
+    this.internalToken = internalToken;
+  }
+
+  public record Completion(
+      UUID userId,
+      UUID routineId,
+      OffsetDateTime completedAt,
+      Integer durationSeconds,
+      Integer totalReps) {}
+
+  @PutMapping("/{sessionId}")
+  public void ingest(
+      @PathVariable UUID sessionId,
+      @RequestHeader(value = "X-Internal-Token", required = false) String token,
+      @RequestBody Completion completion) {
+    if (internalToken.isBlank()) {
+      throw new ResponseStatusException(
+          HttpStatus.SERVICE_UNAVAILABLE, "Internal ingestion is not configured");
     }
-
-    public record Completion(UUID userId, UUID routineId, OffsetDateTime completedAt,
-                             Integer durationSeconds, Integer totalReps) { }
-
-    @PutMapping("/{sessionId}")
-    public void ingest(@PathVariable UUID sessionId,
-            @RequestHeader(value = "X-Internal-Token", required = false) String token,
-            @RequestBody Completion completion) {
-        if (internalToken.isBlank()) {
-            throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "Internal ingestion is not configured");
-        }
-        if (token == null || !MessageDigest.isEqual(
-                internalToken.getBytes(StandardCharsets.UTF_8), token.getBytes(StandardCharsets.UTF_8))) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Invalid internal token");
-        }
-        if (completion == null || completion.userId() == null || completion.completedAt() == null
-            || completion.durationSeconds() == null || completion.totalReps() == null
-            || completion.durationSeconds() < 0 || completion.totalReps() < 0) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid workout completion");
-        }
-        completions.recordCompletedWorkout(sessionId, completion.userId(), completion.routineId(),
-            completion.completedAt(), completion.durationSeconds(), completion.totalReps());
+    if (token == null
+        || !MessageDigest.isEqual(
+            internalToken.getBytes(StandardCharsets.UTF_8),
+            token.getBytes(StandardCharsets.UTF_8))) {
+      throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Invalid internal token");
     }
+    if (completion == null
+        || completion.userId() == null
+        || completion.completedAt() == null
+        || completion.durationSeconds() == null
+        || completion.totalReps() == null
+        || completion.durationSeconds() < 0
+        || completion.totalReps() < 0) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid workout completion");
+    }
+    completions.recordCompletedWorkout(
+        sessionId,
+        completion.userId(),
+        completion.routineId(),
+        completion.completedAt(),
+        completion.durationSeconds(),
+        completion.totalReps());
+  }
 }

@@ -8,12 +8,12 @@ import org.springframework.security.web.SecurityFilterChain;
 
 @Configuration(proxyBeanMethods = false)
 class InternalIngestSecurityConfig {
-    @Bean
-    @Order(1)
-    SecurityFilterChain internalIngestFilterChain(HttpSecurity http) throws Exception {
-        http.securityMatcher("/internal/workout-completions/**")
-            .csrf(csrf -> csrf.disable())
-            .authorizeHttpRequests(authorize -> authorize.anyRequest().permitAll());
-        return http.build();
-    }
+  @Bean
+  @Order(1)
+  SecurityFilterChain internalIngestFilterChain(HttpSecurity http) throws Exception {
+    http.securityMatcher("/internal/workout-completions/**")
+        .csrf(csrf -> csrf.disable())
+        .authorizeHttpRequests(authorize -> authorize.anyRequest().permitAll());
+    return http.build();
+  }
 }
